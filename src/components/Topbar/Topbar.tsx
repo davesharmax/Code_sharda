@@ -76,7 +76,7 @@ const Topbar: React.FC<TopbarProps> = ({ problemPage }) => {
 				)}
 
 				<div className='flex items-center space-x-4 flex-1 justify-end'>
-					<div>
+					{/* <div>
 						<a
 							href='https://www.buymeacoffee.com/burakorkmezz'
 							target='_blank'
@@ -85,7 +85,7 @@ const Topbar: React.FC<TopbarProps> = ({ problemPage }) => {
 						>
 							Premium
 						</a>
-					</div>
+					</div> */}
 					{!user && (
 						<Link
 							href='/auth'
