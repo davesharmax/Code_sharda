@@ -7,6 +7,7 @@ import { useRecoilValue } from "recoil";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
+import useHasMounted from "@/hooks/useHasMounted";
 type AuthPageProps = {};
 
 const AuthPage: React.FC<AuthPageProps> = () => {
@@ -21,6 +22,7 @@ const AuthPage: React.FC<AuthPageProps> = () => {
 	}, [user, router, loading]);
 
 	if (pageLoading) return null;
+
 
 	return (
 		<div className='bg-gradient-to-b from-gray-600 to-black h-screen relative'>
