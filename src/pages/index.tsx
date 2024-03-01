@@ -1,21 +1,31 @@
+import Logout from "@/components/Buttons/Logout";
 import ProblemsTable from "@/components/ProblemsTable/ProblemsTable";
 import Topbar from "@/components/Topbar/Topbar";
 import useHasMounted from "@/hooks/useHasMounted";
-
+import Router, { useRouter } from "next/router";
 import { useState } from "react";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth, firestore } from "@/firebase/firebase";
 
 export default function Home() {
 	const [loadingProblems, setLoadingProblems] = useState(true);
+	const router = useRouter();
+	const [user] = useAuthState(auth);
 	const hasMounted = useHasMounted();
 
 	if (!hasMounted) return null;
+
+	if(!user)
+	router.push('auth');
 
 	return (
 		<>
 			<main className='bg-dark-layer-2 min-h-screen'>
 				<Topbar />
 				<link rel='icon' href='/download.png' />
-				<div className=" flex items-center justify-center my-3.5"><img  src="/download.png"></img></div>
+				<div className="flex items-center justify-center my-3.5">
+					<img src="/download.png" alt="Download Icon" />
+				</div>
 				
 				<h1
 					className='text-2xl text-center text-gray-700 dark:text-gray-400 font-medium
