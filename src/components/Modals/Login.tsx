@@ -39,7 +39,7 @@ const Login: React.FC<LoginProps> = () => {
 			<h3 className='text-xl font-medium text-white'>Sign in to CodeSharda</h3>
 			<div>
 				<label htmlFor='email' className='text-sm font-medium block mb-2 text-gray-300'>
-					Your Email
+					Sharda Email Address
 				</label>
 				<input
 					onChange={handleInputChange}
@@ -50,7 +50,7 @@ const Login: React.FC<LoginProps> = () => {
             border-2 outline-none sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
             bg-gray-600 border-gray-500 placeholder-gray-400 text-white
         '
-					placeholder='name@company.com'
+					placeholder='systemid.name@ug.sharda.ac.in'
 				/>
 			</div>
 			<div>
@@ -83,12 +83,12 @@ const Login: React.FC<LoginProps> = () => {
 					Forgot Password?
 				</a>
 			</button>
-			<div className='text-sm font-medium text-gray-300'>
+			{/* <div className='text-sm font-medium text-gray-300'>
 				Not Registered?{" "}
 				<a href='#' className='text-blue-700 hover:underline' onClick={() => handleClick("register")}>
 					Create account
 				</a>
-			</div>
+			</div> */}
 		</form>
 	);
 };
