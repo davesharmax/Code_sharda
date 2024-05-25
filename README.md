@@ -47,9 +47,9 @@ codechef/ contains problems from CodeChef.
 codeforces/ contains problems from Codeforces.
 leetcode/ contains problems from LeetCode.
 Platform Logos
-CodeChef Logo
 
-LeetCode Logo
+
+
 
 Open any file to view the problem statement and its solution. For example, to run a Python solution:
 
@@ -69,7 +69,7 @@ License
 Distributed under the MIT License. See LICENSE for more information.
 
 Contact
-Ayush Upadhyay - your.email@example.com
+Ayush Upadhyay - ayush30.up@example.com
 
 Project Link: https://github.com/Upadhyayayush30/Code_sharda
 
