@@ -16,13 +16,13 @@ const Workspace: React.FC<WorkspaceProps> = ({ problem }) => {
 	const [solved, setSolved] = useState(false);
 
 	return (
-		<Split className='split' minSize={0}>
+		<div className="flex w-full h-[calc(100vh-62px)] overflow-hidden" >
 			<ProblemDescription problem={problem} _solved={solved} />
-			<div className='bg-dark-fill-2'>
+			<div className='bg-dark-fill-2 w-[55%]'>
 				<Playground problem={problem} setSuccess={setSuccess} setSolved={setSolved} />
 				{success && <Confetti gravity={0.3} tweenDuration={4000} width={width - 1} height={height - 1} />}
 			</div>
-		</Split>
+		</div>
 	);
 };
 export default Workspace;

@@ -1,1 +1,1 @@
-declare module 'react-firebase-hooks/auth';
+// declare module 'react-firebase-hooks/auth/signin';
