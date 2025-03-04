@@ -17,8 +17,8 @@ const SignUp = () => {
     e.preventDefault();
     setError(null);
 
-    if (!email.endsWith(".sharda.ac.in")) {
-      setError("Only emails ending with .sharda.ac.in are allowed.");
+    if (!email.endsWith("sharda.ac.in")) {
+      setError("Only emails ending with sharda.ac.in are allowed.");
       return;
     }
 

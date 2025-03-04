@@ -14,8 +14,6 @@ export type Problem = {
 	examples: Example[];
 	constraints: string;
 	order: number;
-	starterCode: string;
-	starterFunctionName: string;
 };
 
 export type DBProblem = {

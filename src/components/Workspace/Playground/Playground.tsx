@@ -146,11 +146,11 @@ const Playground: React.FC<PlaygroundProps> = ({
   useEffect(() => {
     const code = localStorage.getItem(`code-${pid}`);
     if (user) {
-      setUserCode(code ? JSON.parse(code) : problem.starterCode);
+      setUserCode(code ? JSON.parse(code) : "");
     } else {
-      setUserCode(problem.starterCode);
+      setUserCode("");
     }
-  }, [pid, user, problem.starterCode]);
+  }, [pid, user]);
 
   const onChange = (value: string | undefined) => {
     if (value !== undefined) {

@@ -7,8 +7,8 @@ import { auth } from "@/lib/firebase";
 const Leaderboard = () => {
   interface Leader {
     id: string;
-    rank: number;
-    displayName?: string;
+    rank: number ;
+    displayName: string;
     solvedCount: number;
   }
 
@@ -22,41 +22,57 @@ const Leaderboard = () => {
       const querySnapshot = await getDocs(usersRef);
 
       const leaderboardData = querySnapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          displayName: doc.data().displayName || "Anonymous",
-          solvedCount: doc.data().solvedProblems?.length || 0,
-        }))
-        .sort((a, b) => b.solvedCount - a.solvedCount)
+        .map((doc) => {
+          const data = doc.data();
+          if (data.role === "faculty") return null;
+          return {
+            id: doc.id,
+            displayName: data.displayName || "Anonymous",
+            solvedCount: data.solvedProblems ? data.solvedProblems.length : 0,
+          };
+        })
+        .filter(Boolean)
+        .sort((a, b) => (b?.solvedCount || 0) - (a?.solvedCount || 0))
         .slice(0, 10)
-        .map((user, index) => ({ ...user, rank: index + 1 }));
+        .map((user, index) => {
+          if (user === null) return null;
+          return { ...user, rank: index + 1, solvedCount: user.solvedCount || 0 };
+        })
+        .filter((user): user is Leader => user !== null);
 
       setLeaders(leaderboardData);
     };
 
-    const fetchUserRank = async () => {
-      if (!user) return;
+    // const fetchUserRank = async () => {
+    //   if (!user) return;
 
-      const usersRef = collection(firestore, "users");
-      const querySnapshot = await getDocs(usersRef);
+    //   const usersRef = collection(firestore, "users");
+    //   const querySnapshot = await getDocs(usersRef);
 
-      let allUsers = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        displayName: doc.data().displayName || "Anonymous",
-        solvedCount: doc.data().solvedProblems?.length || 0,
-      }));
+    //   let allUsers = querySnapshot.docs
+    //     .map((doc) => {
+    //       const data = doc.data();
+    //       if (data.role === "faculty") return null;
+    //       return {
+    //         id: doc.id,
+    //         displayName: data.displayName || "Anonymous",
+    //         solvedCount: data.solvedProblems?.length || 0,
+    //       };
+    //     })
+    //     .filter(Boolean);
 
-      allUsers.sort((a, b) => b.solvedCount - a.solvedCount);
+    //   allUsers.sort((a, b) => b.solvedCount - a.solvedCount);
 
-      const userData = allUsers.find((u) => u.id === user.uid);
-      if (userData) {
-        setUserRank({ ...userData, rank: allUsers.indexOf(userData) + 1 });
-      }
-    };
+    //   const userData = allUsers.find((u) => u.id === user.uid);
+    //   if (userData) {
+    //     setUserRank({ ...userData, rank: allUsers.indexOf(userData) + 1 });
+    //   }
+    // };
 
     fetchLeaderboard();
-    fetchUserRank();
+    // fetchUserRank();
   }, [user]);
+
 
   return (
     <div className="flex bg-dark-layer-1 h-[calc(100vh-62px)] flex-col text-white px-20">

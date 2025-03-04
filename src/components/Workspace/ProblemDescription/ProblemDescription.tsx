@@ -12,15 +12,8 @@ import {
 } from "firebase/firestore"
 import { useEffect, useState } from "react"
 import { useAuthState } from "react-firebase-hooks/auth"
-import {
-  AiFillLike,
-  AiFillDislike,
-  AiOutlineLoading3Quarters,
-  AiFillStar,
-} from "react-icons/ai"
+
 import { BsCheck2Circle } from "react-icons/bs"
-import { TiStarOutline } from "react-icons/ti"
-import { toast } from "react-toastify"
 
 type ProblemDescriptionProps = {
   problem: Problem
