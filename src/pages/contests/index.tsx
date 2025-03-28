@@ -94,6 +94,14 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/lib/firebase";
 import Link from "next/link";
 
+// Define the Contest interface
+interface Contest {
+  id: string;
+  name: string;
+  startTime: string;
+  duration: number;
+}
+
 const Contests = () => {
   const [user] = useAuthState(auth);
   const [contests, setContests] = useState([]);
@@ -105,8 +113,8 @@ const Contests = () => {
       const querySnapshot = await getDocs(contestsRef);
 
       const contestsData = querySnapshot.docs.map((doc) => ({
+        ...(doc.data() as Contest),
         id: doc.id,
-        ...doc.data(),
       }));
 
       const currentTime = new Date();
