@@ -1,9 +1,9 @@
-import assert from "assert";
+
 import { Problem } from "../types/problem";
 
 export const mergeIntervals: Problem = {
 	id: "merge-intervals",
-	title: "2. Merge Intervals",
+	title: "Merge Intervals",
 	problemStatement: `<p class='mt-3'>
   Given an array of intervals where each interval is represented as <code>[start, end]</code>, merge all overlapping intervals and return an array of the merged intervals.
 </p>
@@ -32,5 +32,5 @@ export const mergeIntervals: Problem = {
 	],
 	constraints: `<li class='mt-2'><code>1 ≤ intervals.length ≤ 10^4</code></li>
 <li class='mt-2'><code>0 ≤ intervals[i][0] ≤ intervals[i][1] ≤ 10^4</code></li>`,
-	order: 2,
+	order: 7,
 };

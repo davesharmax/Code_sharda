@@ -2,7 +2,7 @@ import assert from "assert";
 import { Problem } from "../types/problem";
 
 export const maximumDepthBinaryTree: Problem = {
-	id: "maximum-depth-binary-tree",
+	id: "maximum-depth-of-binary-tree",
 	title: "3. Maximum Depth of Binary Tree",
 	problemStatement: `<p class='mt-3'>
   Given the <code>root</code> of a binary tree, return its maximum depth.

@@ -3,7 +3,7 @@ import { Problem } from "../types/problem";
 
 export const reverseLinkedList: Problem = {
 	id: "reverse-linked-list",
-	title: "5. Reverse Linked List",
+	title: "2. Reverse Linked List",
 	problemStatement: `<p class='mt-3'>
   Given the head of a singly linked list, reverse the list, and return the reversed list.
 </p>
@@ -26,5 +26,5 @@ export const reverseLinkedList: Problem = {
 	],
 	constraints: `<li class='mt-2'><code>0 ≤ number of nodes ≤ 5000</code></li>
 <li class='mt-2'><code>-5000 ≤ Node.val ≤ 5000</code></li>`,
-	order: 5,
+	order: 2,
 };

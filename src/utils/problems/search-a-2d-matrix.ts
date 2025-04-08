@@ -36,5 +36,5 @@ export const search2DMatrix: Problem = {
 <li class='mt-2'><code>n == matrix[i].length</code></li>
 <li class='mt-2'><code>1 ≤ m, n ≤ 100</code></li>
 <li class='mt-2'><code>-10^4 ≤ matrix[i][j], target ≤ 10^4</code></li>`,
-	order: 7,
+	order: 5,
 };
