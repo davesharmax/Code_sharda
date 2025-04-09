@@ -2,234 +2,130 @@
 
 import { useState } from "react";
 import { firestore, auth } from "@/lib/firebase";
-import {
-  collection,
-  addDoc,
-  getDocs,
-  doc,
-  getDoc,
-} from "firebase/firestore";
+import { collection, addDoc } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useRouter } from "next/navigation";
 
+interface ContestFormData {
+  name: string;
+  startTime: string;
+  duration: number; // in minutes
+  problemIds: string; // comma separated values
+}
+
 const CreateContest = () => {
   const [user] = useAuthState(auth);
-  const router = useRouter();
-
-  const [contestData, setContestData] = useState({
+  const [formData, setFormData] = useState<ContestFormData>({
     name: "",
     startTime: "",
-    duration: "",
-    description: "",
+    duration: 0,
+    problemIds: "",
   });
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const router = useRouter();
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const [numberOfQuestions, setNumberOfQuestions] = useState(0);
-  const [questionIds, setQuestionIds] = useState<string[]>([]);
-  const [questionTitles, setQuestionTitles] = useState<string[]>([]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setContestData({ ...contestData, [e.target.name]: e.target.value });
-  };
-
-  const handleQuestionIdChange = async (index: number, value: string) => {
-    const updatedIds = [...questionIds];
-    updatedIds[index] = value;
-    setQuestionIds(updatedIds);
-
-    if (value.trim() !== "") {
-      try {
-        const questionDoc = await getDoc(doc(firestore, "questions", value));
-        if (questionDoc.exists()) {
-          const title = questionDoc.data().title;
-          const updatedTitles = [...questionTitles];
-          updatedTitles[index] = title;
-          setQuestionTitles(updatedTitles);
-        } else {
-          const updatedTitles = [...questionTitles];
-          updatedTitles[index] = "Not Found";
-          setQuestionTitles(updatedTitles);
-        }
-      } catch (err) {
-        console.error("Error fetching question:", err);
-      }
-    }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg(null);
 
-    if (
-      !contestData.name ||
-      !contestData.startTime ||
-      !contestData.duration
-    ) {
-      setError("All fields are required.");
+    // Ensure the user is authenticated
+    if (!user) {
+      setErrorMsg("You must be logged in to create a contest.");
       return;
     }
 
-    if (
-      isNaN(Number(contestData.duration)) ||
-      Number(contestData.duration) <= 0
-    ) {
-      setError("Duration must be a positive number.");
-      return;
-    }
+    // Optionally check for a faculty role if using custom claims
+    // If you are not setting custom claims, comment out this block
+    // if (!(user as any)?.token?.role || (user as any).token.role !== "faculty") {
+    //   setErrorMsg("Only faculty members are allowed to create contests.");
+    //   return;
+    // }
 
-    if (
-      questionIds.length === 0 ||
-      questionIds.some((id) => id.trim() === "")
-    ) {
-      setError("Please provide valid Question IDs.");
-      return;
-    }
+    const contestData = {
+      name: formData.name,
+      startTime: formData.startTime,
+      duration: formData.duration,
+      problemIds: formData.problemIds.split(",").map((id) => id.trim()),
+      createdBy: user.uid,
+      status: "active",
+    };
 
     try {
-      setLoading(true);
-      setError("");
-
-      const usersRef = collection(firestore, "users");
-      const userDocs = await getDocs(usersRef);
-      const currentUser = userDocs.docs.find((doc) => doc.id === user?.uid);
-
-      if (!currentUser || currentUser.data().role !== "faculty") {
-        setError("You are not authorized to create a contest.");
-        return;
-      }
-
-      await addDoc(collection(firestore, "contests"), {
-        name: contestData.name,
-        startTime: new Date(contestData.startTime).toISOString(),
-        duration: Number(contestData.duration),
-        description: contestData.description,
-        createdBy: user?.uid,
-        questionIds: questionIds,
-      });
-
-      alert("Contest Created Successfully!");
+      await addDoc(collection(firestore, "contests"), contestData);
       router.push("/contests");
-    } catch (err) {
-      setError("Error creating contest. Try again.");
-      console.error(err);
-    } finally {
-      setLoading(false);
+    } catch (error: any) {
+      console.error("Error creating contest:", error);
+      // Check if the error is related to permissions
+      if (error.code === "permission-denied") {
+        setErrorMsg("Insufficient permissions to create contest. Please contact an administrator.");
+      } else {
+        setErrorMsg("An error occurred while creating the contest.");
+      }
     }
   };
 
-  if (!user) return <p className="text-center text-gray-500">Loading...</p>;
-
   return (
-    <div className="p-6 bg-dark-layer-2 min-h-screen overflow-auto">
-
-      <div className="w-[50%] mx-auto">
-        <h2 className="text-2xl text-white font-bold text-center mb-6">
-          Create Contest
-        </h2>
-
-        {error && <p className="text-red-500 text-center">{error}</p>}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-white">Contest Name</label>
-            <input
-              type="text"
-              name="name"
-              value={contestData.name}
-              onChange={handleChange}
-              className="w-full p-2 rounded bg-dark-fill-3 text-white border border-gray-600"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-white">Start Time</label>
-            <input
-              type="datetime-local"
-              name="startTime"
-              value={contestData.startTime}
-              onChange={handleChange}
-              className="w-full p-2 rounded bg-dark-fill-3 text-white border border-gray-600"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-white">
-              Duration (in minutes)
-            </label>
-            <input
-              type="number"
-              name="duration"
-              value={contestData.duration}
-              onChange={handleChange}
-              className="w-full p-2 rounded bg-dark-fill-3 text-white border border-gray-600"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-white">Description (Optional)</label>
-            <textarea
-              name="description"
-              value={contestData.description}
-              onChange={handleChange}
-              className="w-full p-2 rounded bg-dark-fill-3 text-white border border-gray-600"
-            />
-          </div>
-
-          <div>
-            <label className="block text-white">
-              Number of Questions in Contest
-            </label>
-            <input
-              type="number"
-              min={0}
-              max={20}
-              value={numberOfQuestions}
-              onChange={(e) => {
-                const num = parseInt(e.target.value, 10);
-                if (!isNaN(num) && num >= 0 && num <= 20) {
-                  setNumberOfQuestions(num);
-                  setQuestionIds(new Array(num).fill(""));
-                  setQuestionTitles(new Array(num).fill(""));
-                }
-              }}
-              className="w-full p-2 rounded bg-dark-fill-3 text-white border border-gray-600"
-            />
-          </div>
-
-          {questionIds.map((id, index) => (
-            <div key={index} className="flex flex-col gap-1">
-              <label className="text-white">Question ID #{index + 1}</label>
-              <input
-                type="text"
-                value={id}
-                onChange={(e) =>
-                  handleQuestionIdChange(index, e.target.value)
-                }
-                className="w-full p-2 rounded bg-dark-fill-3 text-white border border-gray-600"
-              />
-              {questionTitles[index] && (
-                <p className="text-sm text-green-400">
-                  Title: {questionTitles[index]}
-                </p>
-              )}
-            </div>
-          ))}
-
+    <div className="px-48 p-6 bg-dark-layer-1 w-full h-screen text-white">
+      <h2 className="text-3xl font-bold text-center mb-6">Create a New Contest</h2>
+      {errorMsg && <p className="text-red-500 text-center mb-4">{errorMsg}</p>}
+      <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto">
+        <div>
+          <label className="block mb-1">Contest Name</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            className="w-full p-2 rounded bg-dark-layer-2 border border-gray-700"
+            required
+          />
+        </div>
+        <div>
+          <label className="block mb-1">Start Time</label>
+          <input
+            type="datetime-local"
+            name="startTime"
+            value={formData.startTime}
+            onChange={handleChange}
+            className="w-full p-2 rounded bg-dark-layer-2 border border-gray-700"
+            required
+          />
+        </div>
+        <div>
+          <label className="block mb-1">Duration (minutes)</label>
+          <input
+            type="number"
+            name="duration"
+            value={formData.duration}
+            onChange={handleChange}
+            className="w-full p-2 rounded bg-dark-layer-2 border border-gray-700"
+            required
+          />
+        </div>
+        <div>
+          <label className="block mb-1">Problem IDs (comma separated)</label>
+          <textarea
+            name="problemIds"
+            value={formData.problemIds}
+            onChange={handleChange}
+            className="w-full p-2 rounded bg-dark-layer-2 border border-gray-700"
+            placeholder="e.g., prob1, prob2, prob3"
+            required
+          />
+        </div>
+        <div className="text-center">
           <button
             type="submit"
-            className="w-full bg-brand-orange text-white py-2 rounded hover:bg-orange-500"
-            disabled={loading}
+            className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
           >
-            {loading ? "Creating..." : "Create Contest"}
+            Create Contest
           </button>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   );
 };
