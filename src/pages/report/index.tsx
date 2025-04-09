@@ -82,20 +82,20 @@ const ReportDashboard = () => {
             <p className="text-lg">{totalStudents}</p>
           </div>
           <div className="p-4 border rounded ">
-          <p className="text-2xl uppercase font-bold"> Total Submissions</p>
-          <p className="text-lg">{totalSubmissions}</p>
+            <p className="text-2xl uppercase font-bold"> Total Submissions</p>
+            <p className="text-lg">{totalSubmissions}</p>
           </div>
           {/* <div className="p-4 border rounded ">
             Average Solved Problems per Student: {averageSolved.toFixed(2)}
           </div> */}
           <div className="p-4 border rounded ">
-          <p className="text-2xl uppercase font-bold"> Most Active Student</p>
-          <p className="text-lg">{mostActiveStudent || "N/A"}</p>
+            <p className="text-2xl uppercase font-bold"> Most Active Student</p>
+            <p className="text-lg">{mostActiveStudent || "N/A"}</p>
           </div>
         </div>
         <div className="flex gap-10">
           <div className="w-[30%]">
-            <h3 className="font-bold mb-2 text-2xl">Student Performance</h3>
+            <h3 className="font-bold mb-2 text-2x">Student Performance</h3>
             <table className="w-full border">
               <thead>
                 <tr className="border-b">
