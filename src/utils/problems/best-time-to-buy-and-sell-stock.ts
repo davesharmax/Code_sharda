@@ -2,7 +2,7 @@ import assert from "assert";
 import { Problem } from "../types/problem";
 
 export const bestTimeToBuySellStock: Problem = {
-	id: "best-time-to-buy-sell-stock",
+	id: "best-time-to-buy-and-sell-stock",
 	title: "9. Best Time to Buy and Sell Stock",
 	problemStatement: `<p class='mt-3'>
   Given an array <code>prices</code> where <code>prices[i]</code> is the price of a given stock on the <em>i-th</em> day, determine the maximum profit you can achieve by buying on one day and selling on a later day.

@@ -21,7 +21,6 @@ interface Problem {
   difficulty?: string;
   category?: string;
   status?: string;
-  // Add any additional fields as needed
 }
 
 const ContestDetailsPage = () => {
@@ -32,8 +31,27 @@ const ContestDetailsPage = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [user] = useAuthState(auth);
+  const [timeLeft, setTimeLeft] = useState<string>("");
+
+  const fetchProblems = async (problemIds: string[]) => {
+    try {
+      const problemsRef = collection(firestore, "problems");
+      const querySnapshot = await getDocs(problemsRef);
+      const allProblems = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as Problem),
+      }));
+      const filtered = allProblems.filter((p) => problemIds.includes(p.id));
+      setProblems(filtered);
+    } catch (error) {
+      console.error("Error fetching problems:", error);
+      setErrorMsg("Error fetching contest problems.");
+    }
+  };
 
   useEffect(() => {
+    let timer: NodeJS.Timeout;
+
     const fetchContest = async () => {
       setErrorMsg(null);
       try {
@@ -43,16 +61,27 @@ const ContestDetailsPage = () => {
           const contestData = { id: contestSnap.id, ...(contestSnap.data() as Contest) };
           setContest(contestData);
 
-          // Determine contest active status
           const startDate = new Date(contestData.startTime);
           const endDate = new Date(startDate.getTime() + contestData.duration * 60000);
-          const currentTime = new Date();
-          setIsActive(currentTime >= startDate && currentTime <= endDate);
+          const updateStatus = () => {
+            const now = new Date();
+            if (now < startDate) {
+              setIsActive(false);
+              const diff = startDate.getTime() - now.getTime();
+              setTimeLeft(`Starts in: ${formatTime(diff)}`);
+            } else if (now >= startDate && now <= endDate) {
+              setIsActive(true);
+              const diff = endDate.getTime() - now.getTime();
+              setTimeLeft(`Ends in: ${formatTime(diff)}`);
+              fetchProblems(contestData.problemIds);
+            } else {
+              setIsActive(false);
+              setTimeLeft("Contest has ended.");
+            }
+          };
 
-          // If contest has started, fetch contest problems
-          if (currentTime >= startDate) {
-            await fetchProblems(contestData.problemIds);
-          }
+          updateStatus();
+          timer = setInterval(updateStatus, 1000);
         } else {
           setErrorMsg("Contest not found.");
         }
@@ -64,31 +93,23 @@ const ContestDetailsPage = () => {
       }
     };
 
-    const fetchProblems = async (problemIds: string[]) => {
-      try {
-        // Fetch from your problems collection (adjust the collection name if needed)
-        const problemsRef = collection(firestore, "problems");
-        const querySnapshot = await getDocs(problemsRef);
-        const allProblems = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as Problem),
-        }));
-        // Filter only the problems that match the contest's problemIds
-        const filtered = allProblems.filter((p) => problemIds.includes(p.id));
-        setProblems(filtered);
-      } catch (error) {
-        console.error("Error fetching problems:", error);
-        setErrorMsg("Error fetching contest problems.");
-      }
-    };
-
     if (user) {
       fetchContest();
     } else {
       setErrorMsg("You must be logged in to view contest details.");
       setLoading(false);
     }
+
+    return () => clearInterval(timer);
   }, [params.contestId, user]);
+
+  const formatTime = (ms: number): string => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSeconds / 3600).toString().padStart(2, "0");
+    const minutes = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, "0");
+    const seconds = (totalSeconds % 60).toString().padStart(2, "0");
+    return `${hours}:${minutes}:${seconds}`;
+  };
 
   if (loading) return <div className="text-white text-center mt-6">Loading contest details...</div>;
   if (errorMsg) return <div className="text-red-500 text-center mt-6">{errorMsg}</div>;
@@ -98,9 +119,14 @@ const ContestDetailsPage = () => {
       {contest && (
         <>
           <h2 className="text-3xl font-bold text-center mb-6">{contest.name}</h2>
-          <p className="text-gray-400 mb-4">
-            Start Time: {new Date(contest.startTime).toLocaleString()} | Duration: {contest.duration} min
+          <p className="text-gray-400 mb-1">
+            Start Time: {new Date(contest.startTime).toLocaleString()}
           </p>
+          <p className="text-gray-400 mb-2">
+            Duration: {contest.duration} min
+          </p>
+          <p className="text-brand-orange font-medium mb-4">{timeLeft}</p>
+
           {isActive ? (
             <>
               <h3 className="text-xl font-semibold mb-4">Contest Problems</h3>
@@ -127,12 +153,19 @@ const ContestDetailsPage = () => {
             </>
           ) : (
             <>
-              <p className="mb-4">The contest is no longer active.</p>
-              <Link href={`/contests/${contest.id}/leaderboard`}>
-                <button className="px-4 py-2 bg-brand-orange text-white rounded hover:bg-orange-500">
-                  View Leaderboard
-                </button>
+              <p className="mb-4">
+                {timeLeft === "Contest has ended." ? "The contest has ended." : "The contest has not started yet."}
+              </p>
+              {timeLeft === "Contest has ended." && (
+                
+              <Link
+                  href={`/contests/${contest.id}/leaderboard`}
+                  className="inline-block px-4 py-2 bg-brand-orange text-white rounded hover:bg-orange-500"
+               >
+                 View Leaderboard
               </Link>
+
+              )}
             </>
           )}
         </>
